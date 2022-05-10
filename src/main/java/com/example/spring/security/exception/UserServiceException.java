@@ -7,6 +7,6 @@ public class UserServiceException extends Exception {
     }
 
     public static String NotFoundException(String userId) {
-        return "Todo with ID " + userId + " was not found.";
+        return "User with ID " + userId + " was not found.";
     }
 }

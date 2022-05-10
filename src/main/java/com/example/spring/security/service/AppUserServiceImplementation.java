@@ -30,6 +30,7 @@ public class AppUserServiceImplementation implements AppUserService {
             throw new UserServiceException(UserServiceException.NotFoundException(userId));
         }
 
+        log.info("Get user information...");
         return currentUser.get();
     }
 
@@ -40,16 +41,20 @@ public class AppUserServiceImplementation implements AppUserService {
         if(allUsers.size() <= 0) {
             return new ArrayList<>();
         }
+
+        log.info("Get all users...");
         return allUsers;
     }
 
     @Override
     public AppUser saveUser(AppUser user) {
+        log.info("Saving user...");
         return userRepository.save(user);
     }
 
     @Override
     public AppUserRole saveUserRole(AppUserRole userRole) {
+        log.info("Saving user role...");
         return userRoleRepository.save(userRole);
     }
 
@@ -58,6 +63,7 @@ public class AppUserServiceImplementation implements AppUserService {
         AppUser user = userRepository.findByUsername(username);
         AppUserRole role = userRoleRepository.findByName(roleName);
 
+        log.info("Adding role to user...");
         user.getRoles().add(role);
     }
 }
