@@ -4,10 +4,14 @@ import com.example.spring.security.exception.UserServiceException;
 import com.example.spring.security.model.AppUser;
 import com.example.spring.security.model.AppUserRole;
 import com.example.spring.security.service.AppUserServiceImplementation;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -28,18 +32,27 @@ public class UserController {
 
     @PostMapping("/users")
     public ResponseEntity<AppUser> addUser(@RequestBody AppUser user) {
-        return ResponseEntity.ok().body(userServiceImplementation.saveUser(user));
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/users").toUriString());
+        return ResponseEntity.created(uri).body(userServiceImplementation.saveUser(user));
     }
 
     @PostMapping("/roles")
     public ResponseEntity<AppUserRole> addRole(@RequestBody AppUserRole userRole) {
-        return ResponseEntity.ok().body(userServiceImplementation.saveUserRole(userRole));
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/roles").toUriString());
+        return ResponseEntity.created(uri).body(userServiceImplementation.saveUserRole(userRole));
     }
 
-    @PostMapping("/roles/{username}")
-    public ResponseEntity<Integer> addRoleToUser(@PathVariable("username") String username, @RequestBody String userRole) {
-        userServiceImplementation.addRoleToUser(username, userRole);
+    @PostMapping("/roles")
+    public ResponseEntity<Integer> addRoleToUser(@RequestBody RoleToUserForm form) {
+        userServiceImplementation.addRoleToUser(form.getUsername(), form.getRoleName());
         return ResponseEntity.ok(201);
     }
 
+}
+
+@Getter
+@Setter
+class RoleToUserForm {
+    private String username;
+    private String roleName;
 }
