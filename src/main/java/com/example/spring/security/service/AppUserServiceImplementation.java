@@ -7,10 +7,16 @@ import com.example.spring.security.repository.AppUserRepository;
 import com.example.spring.security.repository.AppUserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +24,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 @Service
-public class AppUserServiceImplementation implements AppUserService {
+public class AppUserServiceImplementation implements AppUserService, UserDetailsService {
     private final AppUserRepository userRepository;
     private final AppUserRoleRepository userRoleRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        AppUser appUser = userRepository.findByUsername(username);
+
+        if (appUser == null) {
+            log.error("User with username {} not found", username);
+            throw new UsernameNotFoundException("User not found");
+        } else {
+            log.info("User with username {} found", username);
+        }
+
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+
+        appUser.getRoles().forEach(role -> {
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
+        });
+
+        return new User(appUser.getUsername(), appUser.getPassword(), authorities);
+    }
 
     @Override
     public AppUser getUser(String userId) throws UserServiceException {
@@ -66,4 +92,5 @@ public class AppUserServiceImplementation implements AppUserService {
         log.info("Adding role to user...");
         user.getRoles().add(role);
     }
+
 }
